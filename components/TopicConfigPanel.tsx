@@ -44,7 +44,7 @@ export function TopicConfigPanel({ topics, onAddTopic, onRemoveTopic, allTopicTy
           onChange={(e) => { setInputValue(e.target.value); setError(null); }}
           onKeyDown={handleKeyDown}
           placeholder="例: nextjs, react, typescript"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           aria-label="トピック名入力"
         />
         <button
@@ -65,10 +65,12 @@ export function TopicConfigPanel({ topics, onAddTopic, onRemoveTopic, allTopicTy
       <ul className="space-y-2" aria-label="トピック一覧">
         {topics.map((topic) => {
           const colors = getTopicColor(topic.type, allTopicTypes);
+          // バッジの背景色のみ使用し、テキストは黒で統一（視認性向上）
+          const badgeBg = colors.badge.split(' ').find(c => c.startsWith('bg-')) || 'bg-gray-100';
           return (
             <li key={topic.type} className="flex items-center justify-between py-2 px-3 rounded-lg border border-gray-100 hover:bg-gray-50">
               <div className="flex items-center gap-2">
-                <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ${colors.badge}`}>
+                <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ${badgeBg} text-gray-900`}>
                   {topic.name}
                 </span>
                 {isDefaultTopic(topic.type) && (

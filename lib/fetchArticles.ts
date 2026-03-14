@@ -99,8 +99,16 @@ export async function fetchArticles(topicConfigs?: TopicConfig[]): Promise<Fetch
     }
   }
   
+  // 記事の重複排除（同じlinkの記事は最初に取得されたものを優先）
+  const seenLinks = new Set<string>();
+  const uniqueArticles = allArticles.filter(article => {
+    if (seenLinks.has(article.link)) return false;
+    seenLinks.add(article.link);
+    return true;
+  });
+
   // 記事を公開日時の降順でソート
-  const sortedArticles = sortArticlesByDate(allArticles);
+  const sortedArticles = sortArticlesByDate(uniqueArticles);
   
   return {
     articles: sortedArticles,
