@@ -22,7 +22,11 @@ export async function GET(request: Request): Promise<Response> {
         if (!validateTopicConfigs(parsed)) {
           return Response.json({ error: 'Invalid topics parameter' }, { status: 400 });
         }
-        topicConfigs = parsed;
+        // sourceフィールドが無い場合は'zenn'をデフォルト設定（要件8.3: 後方互換）
+        topicConfigs = (parsed as TopicConfig[]).map((topic) => ({
+          ...topic,
+          source: topic.source ?? 'zenn',
+        }));
       } catch {
         return Response.json({ error: 'Invalid JSON in topics parameter' }, { status: 400 });
       }

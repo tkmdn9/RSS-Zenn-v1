@@ -35,6 +35,14 @@ export interface FetchArticlesResult {
 export async function fetchArticles(topicConfigs?: TopicConfig[]): Promise<FetchArticlesResult> {
   let topics: TopicConfig[];
 
+  // サーバーサイドのデフォルトトピック（環境変数が未定義の場合のフォールバック）
+  const DEFAULT_SERVER_TOPICS: TopicConfig[] = [
+    { name: 'Claude Code', url: 'https://zenn.dev/topics/claudecode/feed', type: 'claudecode', source: 'zenn' },
+    { name: 'Skills', url: 'https://zenn.dev/topics/skills/feed', type: 'skills', source: 'zenn' },
+    { name: 'MCP', url: 'https://zenn.dev/topics/mcp/feed', type: 'mcp', source: 'zenn' },
+    { name: 'RAG', url: 'https://zenn.dev/topics/rag/feed', type: 'rag', source: 'zenn' },
+  ];
+
   if (topicConfigs) {
     // 引数が渡された場合はそれを使用
     topics = topicConfigs;
@@ -43,19 +51,23 @@ export async function fetchArticles(topicConfigs?: TopicConfig[]): Promise<Fetch
     const topicsEnv = process.env.NEXT_PUBLIC_TOPICS;
     
     if (!topicsEnv) {
-      throw new Error('NEXT_PUBLIC_TOPICS environment variable is not defined');
-    }
-    
-    // JSON形式のトピック設定をパース（要件10.2）
-    try {
-      topics = JSON.parse(topicsEnv);
-    } catch (error) {
-      throw new Error('Invalid NEXT_PUBLIC_TOPICS format: must be valid JSON');
-    }
-    
-    // トピック設定の検証
-    if (!Array.isArray(topics)) {
-      throw new Error('NEXT_PUBLIC_TOPICS must be an array');
+      // 環境変数が未定義の場合はデフォルトトピックを使用（Cloudflare Pages対応）
+      console.warn('NEXT_PUBLIC_TOPICS is not defined, using default topics');
+      topics = DEFAULT_SERVER_TOPICS;
+    } else {
+      // JSON形式のトピック設定をパース（要件10.2）
+      try {
+        topics = JSON.parse(topicsEnv);
+      } catch (error) {
+        console.warn('Invalid NEXT_PUBLIC_TOPICS format, using default topics');
+        topics = DEFAULT_SERVER_TOPICS;
+      }
+      
+      // トピック設定の検証
+      if (!Array.isArray(topics)) {
+        console.warn('NEXT_PUBLIC_TOPICS is not an array, using default topics');
+        topics = DEFAULT_SERVER_TOPICS;
+      }
     }
   }
   
