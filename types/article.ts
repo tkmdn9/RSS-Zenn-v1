@@ -1,6 +1,11 @@
 // types/article.ts
 
 /**
+ * ソース種別（Zenn または Qiita）
+ */
+export type ArticleSource = 'zenn' | 'qiita';
+
+/**
  * デフォルトトピックの識別用リテラル型（要件6.2）
  */
 export type DefaultTopicType = 'claudecode' | 'skills' | 'mcp' | 'rag';
@@ -55,6 +60,8 @@ export interface TopicConfig {
   url: string;
   /** トピックタイプ */
   type: TopicType;
+  /** ソース種別（オプショナル、後方互換のためデフォルトは'zenn'） */
+  source?: ArticleSource;
 }
 
 /**

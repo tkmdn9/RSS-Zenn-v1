@@ -10,28 +10,56 @@ describe('fetchArticles', () => {
     process.env.NEXT_PUBLIC_TOPICS = originalEnv;
   });
 
-  it('should throw error when NEXT_PUBLIC_TOPICS is not defined', async () => {
+  it('should use default topics when NEXT_PUBLIC_TOPICS is not defined', async () => {
     delete process.env.NEXT_PUBLIC_TOPICS;
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    await expect(fetchArticles()).rejects.toThrow(
-      'NEXT_PUBLIC_TOPICS environment variable is not defined'
+    const result = await fetchArticles();
+    
+    // デフォルトトピックにフォールバックし、エラーではなく結果を返す
+    expect(result).toHaveProperty('articles');
+    expect(result).toHaveProperty('errors');
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'NEXT_PUBLIC_TOPICS is not defined, using default topics'
     );
+    
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
-  it('should throw error when NEXT_PUBLIC_TOPICS is invalid JSON', async () => {
+  it('should use default topics when NEXT_PUBLIC_TOPICS is invalid JSON', async () => {
     process.env.NEXT_PUBLIC_TOPICS = 'invalid json';
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    await expect(fetchArticles()).rejects.toThrow(
-      'Invalid NEXT_PUBLIC_TOPICS format: must be valid JSON'
+    const result = await fetchArticles();
+    
+    expect(result).toHaveProperty('articles');
+    expect(result).toHaveProperty('errors');
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'Invalid NEXT_PUBLIC_TOPICS format, using default topics'
     );
+    
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
-  it('should throw error when NEXT_PUBLIC_TOPICS is not an array', async () => {
+  it('should use default topics when NEXT_PUBLIC_TOPICS is not an array', async () => {
     process.env.NEXT_PUBLIC_TOPICS = '{"name": "test"}';
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    await expect(fetchArticles()).rejects.toThrow(
-      'NEXT_PUBLIC_TOPICS must be an array'
+    const result = await fetchArticles();
+    
+    expect(result).toHaveProperty('articles');
+    expect(result).toHaveProperty('errors');
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      'NEXT_PUBLIC_TOPICS is not an array, using default topics'
     );
+    
+    consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   it('should accept dynamic topic types (non-default types are valid)', async () => {
