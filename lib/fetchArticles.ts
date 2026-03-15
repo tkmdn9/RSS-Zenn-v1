@@ -1,7 +1,7 @@
 // lib/fetchArticles.ts
 
 import Parser from 'rss-parser';
-import type { ZennArticle, TopicConfig, TopicType } from '@/types/article';
+import type { ZennArticle, TopicConfig } from '@/types/article';
 import { normalizeArticle } from './normalizeArticle';
 import { sortArticlesByDate } from './sortArticles';
 
@@ -92,8 +92,13 @@ export async function fetchArticles(topicConfigs?: TopicConfig[]): Promise<Fetch
     }
     
     try {
-      // RSSフィードを取得してパース（要件1.5）
-      const feed = await parser.parseURL(topicConfig.url);
+      // fetch APIでRSSフィードを取得（Cloudflare Workers互換）
+      const response = await fetch(topicConfig.url);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const xml = await response.text();
+      const feed = await parser.parseString(xml);
       
       // 各RSSアイテムを正規化（要件1.4）
       const articles = feed.items.map((item) =>
